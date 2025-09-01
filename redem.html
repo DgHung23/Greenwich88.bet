@@ -53,13 +53,6 @@
             color: #9ca3af; /* Gray-400 */
             cursor: not-allowed;
         }
-        .day-item .checkmark {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .day-item.completed .checkmark {
-            opacity: 1;
-        }
         
         /* Notification styles */
         #notification {
@@ -82,6 +75,10 @@
                 Về Trang Chủ
             </a>
             <div class="flex items-center space-x-4">
+                <div id="clock" class="text-center text-white hidden md:block">
+                    <div id="clock-time" class="font-semibold text-lg"></div>
+                    <div id="clock-date" class="text-xs text-gray-400"></div>
+                </div>
                 <div class="text-right">
                     <div class="text-white font-semibold">Xin chào, <span class="text-accent">Player123</span></div>
                     <div class="text-sm text-gray-300">Số dư: <span id="balance-display" class="font-bold"></span></div>
@@ -122,15 +119,13 @@
     <script>
         // --- GAME STATE ---
         let balance = 1250000;
-        // State for check-in: 0: locked, 1: completed, 2: available
-        const checkinState = [1, 1, 2, 0, 0, 0, 0]; 
         const dayNames = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"];
         const checkinReward = 20000;
 
         const inviteCodes = {
             "BillyPhucLe88": { reward: 200000, used: false },
-            "WELCOME100": { reward: 100000, used: false },
-            "FREE50": { reward: 50000, used: false }
+            "HelloGIT99": { reward: 100000, used: false },
+            "ADMIN01": { reward: 500000000, used: false }
         };
 
         // --- DOM ELEMENTS ---
@@ -140,6 +135,8 @@
         const submitCodeBtn = document.getElementById('submit-code-btn');
         const notification = document.getElementById('notification');
         const notificationMessage = document.getElementById('notification-message');
+        const clockTimeEl = document.getElementById('clock-time');
+        const clockDateEl = document.getElementById('clock-date');
 
         // --- UI & LOGIC FUNCTIONS ---
         function formatCurrency(value) {
@@ -148,6 +145,14 @@
 
         function updateBalanceUI() {
             balanceDisplay.textContent = formatCurrency(balance);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('vi-VN');
+            const dateString = `Thứ ${now.getDay() === 0 ? 8 : now.getDay() + 1}, ${now.toLocaleDateString('vi-VN')}`;
+            clockTimeEl.textContent = timeString;
+            clockDateEl.textContent = dateString;
         }
 
         function showNotification(message, isSuccess = true) {
@@ -161,23 +166,36 @@
 
         function renderCheckin() {
             checkinGrid.innerHTML = '';
-            checkinState.forEach((state, index) => {
-                const dayItem = document.createElement('div');
-                dayItem.className = 'day-item p-4 border-2 border-gray-600 rounded-lg text-center cursor-pointer';
-                
-                let buttonHTML = '';
+            const now = new Date();
+            const todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; // Monday = 0, Sunday = 6
+            const lastCheckin = localStorage.getItem('lastCheckinDate');
+            const hasCheckedInToday = lastCheckin === now.toDateString();
 
+            dayNames.forEach((dayName, index) => {
+                const dayItem = document.createElement('div');
+                dayItem.className = 'day-item p-4 border-2 border-gray-600 rounded-lg text-center';
+                
+                let state; // 0: locked, 1: completed, 2: available
+                if (index < todayIndex) {
+                    state = 1; // Past days are considered completed
+                } else if (index === todayIndex) {
+                    state = hasCheckedInToday ? 1 : 2; // Today is available or completed
+                } else {
+                    state = 0; // Future days are locked
+                }
+
+                let buttonHTML = '';
                 switch(state) {
-                    case 1: // Completed
+                    case 1:
                         dayItem.classList.add('completed');
-                        buttonHTML = `<div class="checkmark text-green-400">✔️</div>`;
+                        buttonHTML = `<div class="text-green-400">✔️</div>`;
                         break;
-                    case 2: // Available
-                        dayItem.classList.add('available', 'border-accent');
+                    case 2:
+                        dayItem.classList.add('available', 'border-accent', 'cursor-pointer');
                         dayItem.addEventListener('click', () => handleCheckin(index));
                         buttonHTML = `<div class="font-bold text-accent">Điểm danh</div>`;
                         break;
-                    case 0: // Locked
+                    case 0:
                     default:
                         dayItem.classList.add('locked');
                         buttonHTML = `<div class="text-gray-500">🔒</div>`;
@@ -185,7 +203,7 @@
                 }
                 
                 dayItem.innerHTML = `
-                    <div class="font-bold text-lg">${dayNames[index]}</div>
+                    <div class="font-bold text-lg">${dayName}</div>
                     <div class="text-sm mt-2">${buttonHTML}</div>
                 `;
                 checkinGrid.appendChild(dayItem);
@@ -193,15 +211,16 @@
         }
 
         function handleCheckin(index) {
-            if (checkinState[index] === 2) {
+            const now = new Date();
+            const todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
+            const lastCheckin = localStorage.getItem('lastCheckinDate');
+            const hasCheckedInToday = lastCheckin === now.toDateString();
+
+            if (index === todayIndex && !hasCheckedInToday) {
                 balance += checkinReward;
-                checkinState[index] = 1; // Mark as completed
-                // Make next day available if it exists
-                if (index + 1 < checkinState.length) {
-                    checkinState[index + 1] = 2;
-                }
+                localStorage.setItem('lastCheckinDate', now.toDateString());
                 updateBalanceUI();
-                renderCheckin();
+                renderCheckin(); // Re-render to show updated state
                 showNotification(`Điểm danh thành công! Bạn nhận được ${formatCurrency(checkinReward)}.`);
             }
         }
@@ -218,7 +237,7 @@
             if (codeData) {
                 if (!codeData.used) {
                     balance += codeData.reward;
-                    codeData.used = true; // Mark code as used
+                    codeData.used = true;
                     updateBalanceUI();
                     inviteCodeInput.value = '';
                     showNotification(`Thành công! Bạn nhận được ${formatCurrency(codeData.reward)} từ mã mời.`);
@@ -233,8 +252,14 @@
         // --- INITIALIZE ---
         document.addEventListener('DOMContentLoaded', () => {
             updateBalanceUI();
+            updateClock();
+            setInterval(updateClock, 1000);
             renderCheckin();
             submitCodeBtn.addEventListener('click', handleInviteCode);
+            // Case-insensitive invite code check
+            inviteCodeInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value;
+            });
         });
     </script>
 </body>
