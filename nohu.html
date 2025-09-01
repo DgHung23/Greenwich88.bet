@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Nổ Hũ - Mẫu</title>
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a modern, clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Reusing the theme from the main page for consistency */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d0e1b;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .bg-primary { background-color: #1a1c33; }
+        .bg-secondary { background-color: #2a2d4e; }
+        .text-accent { color: #ffc400; }
+        .border-accent { border-color: #ffc400; }
+
+        .btn-gradient {
+            background-image: linear-gradient(to right, #ffc400 0%, #ff8a00 51%, #ffc400 100%);
+            background-size: 200% auto;
+            transition: all 0.3s ease-out;
+            color: #1a1c33;
+            font-weight: 900;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px 0 rgba(255, 196, 0, 0.3);
+        }
+        .btn-gradient:hover {
+            background-position: right center;
+            box-shadow: 0 6px 20px 0 rgba(255, 196, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-gradient:disabled {
+            background-image: none;
+            background-color: #555;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- Slot Machine Specific Styles --- */
+        .slot-machine-container {
+            background: linear-gradient(145deg, #2a2d4e, #1a1c33);
+            border: 4px solid #ffc400;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .reels-window {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid #0d0e1b;
+            border-radius: 10px;
+            padding: 1rem;
+            overflow: hidden;
+            height: 240px; /* Height for 3 symbols */
+        }
+
+        .reel {
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* The reel-symbols div will contain a long strip of symbols */
+        .reel-symbols {
+            /* The transition for the final stop bounce effect */
+            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .symbol {
+            font-size: 3rem; /* 48px */
+            height: 80px; /* Matches window height / 3 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jackpot-glow {
+            animation: jackpot-pulse 1.5s infinite;
+        }
+        
+        @keyframes jackpot-pulse {
+            0% { color: #ffc400; text-shadow: 0 0 10px #ffc400; }
+            50% { color: #fff; text-shadow: 0 0 20px #ff8a00; }
+            100% { color: #ffc400; text-shadow: 0 0 10px #ffc400; }
+        }
+
+    </style>
+</head>
+<body class="bg-primary">
+
+    <!-- Simple Header for the game page -->
+    <header class="bg-primary/80 backdrop-blur-sm shadow-lg w-full">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="188bet.html" class="text-2xl font-black text-accent tracking-wider">
+                Greenwich88<span class="text-white">.bet</span>
+            </a>
+            <div class="text-right">
+                <div class="font-semibold text-white">Xin chào, <span id="username">Player123</span></div>
+                <div class="text-accent font-bold">Số dư: <span id="balance">10,000,000</span>đ</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 flex-grow flex items-center justify-center">
+        <div class="w-full max-w-2xl">
+            <!-- Slot Machine -->
+            <div class="slot-machine-container">
+                <!-- Reels Display -->
+                <div class="reels-window mb-6">
+                    <div id="reel1" class="reel"><div class="reel-symbols"></div></div>
+                    <div id="reel2" class="reel"><div class="reel-symbols"></div></div>
+                    <div id="reel3" class="reel"><div class="reel-symbols"></div></div>
+                </div>
+
+                <!-- Notification Area -->
+                <div id="notification" class="text-center h-10 mb-4 text-2xl font-bold transition-opacity duration-300">
+                    CHÚC BẠN MAY MẮN!
+                </div>
+
+                <!-- Controls -->
+                <div class="bg-primary p-4 rounded-lg flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <button class="bg-gray-700 w-12 h-12 rounded-full text-2xl font-bold" onclick="changeBet(-1)">-</button>
+                        <div>
+                            <div class="text-sm text-gray-400">Tiền Cược</div>
+                            <div id="bet-amount-display" class="text-2xl font-bold text-accent">10,000đ</div>
+                        </div>
+                        <button class="bg-gray-700 w-12 h-12 rounded-full text-2xl font-bold" onclick="changeBet(1)">+</button>
+                    </div>
+                    <button id="spin-button" class="btn-gradient w-full py-4 text-3xl uppercase">Quay</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // --- GAME CONFIG ---
+        const SYMBOLS = ['🍒', '🍋', '🍊', '🔔', '💎', '💰'];
+        const PAYOUTS = { '🍒': 10, '🍋': 15, '🍊': 20, '🔔': 50, '💎': 100, '💰': 250 };
+        const BET_LEVELS = [10000, 20000, 50000, 100000, 200000, 500000];
+        const SYMBOL_HEIGHT = 80; // Corresponds to .symbol height in CSS
+        const REEL_SYMBOLS_COUNT = 30; // How many symbols in each reel strip
+
+        // --- GAME STATE ---
+        let balance = 1250000;
+        let currentBetIndex = 0;
+        let isSpinning = false;
+
+        // --- DOM ELEMENTS ---
+        const balanceEl = document.getElementById('balance');
+        const betAmountDisplayEl = document.getElementById('bet-amount-display');
+        const notificationEl = document.getElementById('notification');
+        const spinButton = document.getElementById('spin-button');
+        const reels = [
+            document.querySelector('#reel1 .reel-symbols'),
+            document.querySelector('#reel2 .reel-symbols'),
+            document.querySelector('#reel3 .reel-symbols')
+        ];
+
+        // --- HELPER FUNCTIONS ---
+        function formatCurrency(value) {
+            return value.toLocaleString('vi-VN') + 'đ';
+        }
+
+        function updateBalanceUI() {
+            balanceEl.textContent = formatCurrency(balance);
+        }
+
+        function updateBetUI() {
+            betAmountDisplayEl.textContent = formatCurrency(BET_LEVELS[currentBetIndex]);
+        }
+        
+        function showNotification(message, type = 'normal') {
+            notificationEl.textContent = message;
+            notificationEl.classList.remove('jackpot-glow', 'text-green-400', 'text-red-500');
+            if (type === 'win') {
+                notificationEl.classList.add('text-green-400');
+            } else if (type === 'jackpot') {
+                notificationEl.classList.add('jackpot-glow');
+            } else if (type === 'error') {
+                 notificationEl.classList.add('text-red-500');
+            }
+        }
+
+        // --- GAME LOGIC ---
+        function changeBet(direction) {
+            if (isSpinning) return;
+            currentBetIndex += direction;
+            if (currentBetIndex < 0) currentBetIndex = 0;
+            if (currentBetIndex >= BET_LEVELS.length) currentBetIndex = BET_LEVELS.length - 1;
+            updateBetUI();
+        }
+
+        async function spin() {
+            if (isSpinning) return;
+
+            const betAmount = BET_LEVELS[currentBetIndex];
+            if (betAmount > balance) {
+                showNotification("Không đủ số dư!", "error");
+                return;
+            }
+
+            isSpinning = true;
+            balance -= betAmount;
+            updateBalanceUI();
+            spinButton.disabled = true;
+            spinButton.textContent = "ĐANG QUAY...";
+            showNotification("...");
+
+            // Determine final result before spinning
+            const finalSymbolsIndices = reels.map(() => Math.floor(Math.random() * SYMBOLS.length));
+
+            // Spin each reel
+            await Promise.all(reels.map((reel, i) => {
+                const targetPosition = (REEL_SYMBOLS_COUNT - SYMBOLS.length + finalSymbolsIndices[i]) * SYMBOL_HEIGHT;
+                const spinDuration = 1000 + i * 500; // Staggered spin time
+                
+                // Set transition for fast spinning
+                reel.style.transition = `transform ${spinDuration / 1000}s linear`;
+                
+                // Calculate a random high number for the spin to make it look like it's spinning many times
+                const spinCycles = 3;
+                const randomOffset = (REEL_SYMBOLS_COUNT * SYMBOL_HEIGHT * spinCycles);
+                reel.style.transform = `translateY(-${randomOffset}px)`;
+                
+                // Return a promise that resolves when this reel has stopped
+                return new Promise(resolve => setTimeout(() => {
+                    // Set final transition for the bounce effect
+                    reel.style.transition = `transform 1s cubic-bezier(0.25, 1, 0.5, 1)`;
+                    // To show the symbol in the middle, we need to position it correctly
+                    // translateY(- (index - 1) * SYMBOL_HEIGHT)
+                    const finalTranslateY = -((REEL_SYMBOLS_COUNT - SYMBOLS.length + finalSymbolsIndices[i]) - 1) * SYMBOL_HEIGHT;
+                    reel.style.transform = `translateY(${finalTranslateY}px)`;
+                    resolve();
+                }, spinDuration));
+            }));
+
+            // All reels have stopped, now check for win
+            const finalSymbols = finalSymbolsIndices.map(index => SYMBOLS[index]);
+            checkWin(finalSymbols);
+        }
+        
+        function checkWin(finalSymbols) {
+             // Wait for the final bounce animation to finish before showing result
+            setTimeout(() => {
+                // Simple win condition: 3 of the same in the middle row
+                if (finalSymbols[0] === finalSymbols[1] && finalSymbols[1] === finalSymbols[2]) {
+                    const winningSymbol = finalSymbols[0];
+                    const betAmount = BET_LEVELS[currentBetIndex];
+                    const multiplier = PAYOUTS[winningSymbol];
+                    const winnings = betAmount * multiplier;
+                    balance += winnings;
+
+                    if (winningSymbol === '💰') {
+                        showNotification(`NỔ HŨ! +${formatCurrency(winnings)}`, 'jackpot');
+                    } else {
+                        showNotification(`THẮNG! +${formatCurrency(winnings)}`, 'win');
+                    }
+                } else {
+                    showNotification("Chúc bạn may mắn lần sau!");
+                }
+
+                updateBalanceUI();
+                isSpinning = false;
+                spinButton.disabled = false;
+                spinButton.textContent = "QUAY";
+            }, 1000); // 1s matches the bounce transition duration
+        }
+        
+        function buildReels() {
+            reels.forEach(reel => {
+                reel.innerHTML = ''; // Clear existing
+                // Create a long strip of symbols for a smooth infinite scroll illusion
+                for (let i = 0; i < REEL_SYMBOLS_COUNT; i++) {
+                     const symbolEl = document.createElement('div');
+                     symbolEl.className = 'symbol';
+                     // Use modulo to cycle through the SYMBOLS array
+                     symbolEl.textContent = SYMBOLS[i % SYMBOLS.length];
+                     reel.appendChild(symbolEl);
+                }
+            });
+        }
+
+        // --- INITIALIZE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            buildReels();
+            updateBalanceUI();
+            updateBetUI();
+            spinButton.addEventListener('click', spin);
+        });
+
+    </script>
+</body>
+</html>
+

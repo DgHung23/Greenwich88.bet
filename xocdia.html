@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Xóc Đĩa - Mẫu</title>
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a modern, clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Reusing the theme from the main page for consistency */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d0e1b;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .bg-primary { background-color: #1a1c33; }
+        .text-accent { color: #ffc400; }
+        .border-accent { border-color: #ffc400; }
+        
+        /* --- Game Table & Logo --- */
+        .game-table {
+            background: radial-gradient(circle, #6a040f 0%, #370617 100%);
+            border: 8px solid #5a3a22;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .table-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 8vw;
+            font-weight: 900;
+            color: rgba(128, 128, 128, 0.45); /* Grey for .bet */
+            z-index: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .table-logo span {
+            color: rgba(255, 196, 0, 0.45); /* Yellow for Greenwich88 */
+        }
+
+        /* --- Xoc Dia Specific Styles --- */
+        .bowl-area {
+            position: absolute;
+            top: 50%; /* Centered vertically */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 280px;
+            z-index: 5;
+            perspective: 1000px;
+        }
+        .bowl {
+            position: absolute;
+            width: 290px;
+            height: 290px;
+            bottom: 5vh; /* Half hidden */
+            left: -2px;
+            background: radial-gradient(circle at 50% 100%, #8d99ae, #2b2d42);
+            border-radius: 50%;
+            border: 5px solid #222;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.6);
+        }
+        .plate { /* This rule now applies to the img tag */
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            bottom:2vh; /* Sits on top of the bowl */
+            left: 0;
+            border-radius: 50%; /* Ensures the image is always circular */
+            object-fit: cover; /* Makes sure the image fills the circle without stretching */
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 10;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.4);
+        }
+        
+        .plate.shaking {
+            animation: shake 0.9s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        .plate.open {
+            transform: translateY(-200px) rotateZ(15deg) rotateX(20deg);
+        }
+        .coins-container {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            z-index: 6; 
+        }
+        .coin {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+            border: 2px solid #aaa;
+        }
+        .coin.red { background-color: #d62828; border-color: #a01010; }
+        .coin.white { background-color: #f2e9e4; border-color: #ccc; }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Betting Area */
+        .betting-grid {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+        .bet-option {
+            background-color: rgba(0,0,0,0.4);
+            border: 3px solid #ffc400;
+            border-radius: 10px;
+            padding: 1.5rem 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+        }
+        .bet-option:hover {
+            background-color: rgba(255, 196, 0, 0.2);
+            transform: translateY(-5px);
+        }
+        .bet-option.selected {
+            background-color: #ffc400;
+            color: #1a1c33;
+        }
+        .bet-option .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+        .bet-option .payout {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+        .bet-option.selected .payout { color: #1a1c33; }
+
+        .btn-gradient { background-image: linear-gradient(to right, #ffc400 0%, #ff8a00 51%, #ffc400 100%); background-size: 200% auto; transition: all 0.3s ease-out; color: #1a1c33; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 15px 0 rgba(255, 196, 0, 0.3); }
+        .btn-gradient:hover { background-position: right center; box-shadow: 0 6px 20px 0 rgba(255, 196, 0, 0.5); transform: translateY(-2px); }
+        .btn-gradient:disabled { background-image: none; background-color: #555; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        #home-btn { position: absolute; top: 2rem; left: 2rem; z-index: 25; background-color: #1a1c33; color: #ffc400; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; text-decoration: none; border: 2px solid #ffc400; transition: all 0.3s ease-out; box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
+        #home-btn:hover { background-color: #ffc400; color: #1a1c33; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255, 196, 0, 0.3); }
+        
+        .overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; backdrop-filter: blur(5px); }
+        .modal-box { background-color: #1a1c33; padding: 2rem; border-radius: 10px; border: 2px solid #ffc400; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-box p { font-size: 1.25rem; margin-bottom: 1.5rem; }
+        .modal-box input { background-color: #0d0e1b; border: 1px solid #ffc400; color: #e0e0e0; text-align: center; font-size: 1.5rem; padding: 0.5rem; border-radius: 5px; width: 100%; }
+        
+        .quick-bet-btn { background-color: #2b2d42; border: 1px solid #4a4e69; color: #e0e0e0; padding: 0.5rem 1rem; border-radius: 5px; font-weight: 500; transition: background-color 0.2s; }
+        .quick-bet-btn:hover { background-color: #4a4e69; }
+
+        #notification-banner {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 3rem;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+        }
+
+    </style>
+</head>
+<body class="bg-primary">
+    <main class="w-screen h-screen p-4">
+        <a href="188bet.html" id="home-btn">Về Trang Chủ</a>
+        <div class="game-table rounded-2xl">
+            <div class="table-logo"><span>Greenwich88</span>.bet</div>
+
+            <!-- Betting Modal -->
+            <div id="betting-overlay" class="overlay hidden">
+                <div class="modal-box w-full max-w-sm">
+                    <h2 class="text-3xl font-bold text-accent mb-4">Đặt Cược</h2>
+                    <p>Số dư của bạn: <span id="betting-balance" class="font-bold"></span></p>
+                    <div class="flex justify-center gap-2 mb-4">
+                        <button class="quick-bet-btn" data-amount="20000">20K</button>
+                        <button class="quick-bet-btn" data-amount="50000">50K</button>
+                        <button class="quick-bet-btn" data-amount="500000">500K</button>
+                    </div>
+                    <input type="number" id="bet-amount-input" placeholder="Nhập số tiền cược" class="mb-6">
+                    <button id="place-bet-btn" class="btn-gradient text-xl py-3 w-full">Xác Nhận</button>
+                </div>
+            </div>
+
+            <div id="notification-banner"></div>
+
+            <!-- Game Area -->
+            <div class="bowl-area">
+                <div class="bowl">
+                    <div class="coins-container">
+                        <div id="coin1" class="coin"></div>
+                        <div id="coin2" class="coin"></div>
+                        <div id="coin3" class="coin"></div>
+                        <div id="coin4" class="coin"></div>
+                    </div>
+                 </div>
+                 <!-- The plate is now an img tag. Replace the src with your image URL. -->
+                <img id="plate-img" class="plate" src="./asset/dish.png" alt="Cai Dia">
+            </div>
+            
+            <!-- Betting Grid -->
+            <div class="betting-grid">
+                <div id="bet-chan" class="bet-option">
+                    <div class="title">CHẴN</div>
+                    <div class="payout">1 : 1.95</div>
+                </div>
+                <div id="bet-le" class="bet-option">
+                    <div class="title">LẺ</div>
+                    <div class="payout">1 : 1.95</div>
+                </div>
+            </div>
+
+            <!-- Game Info -->
+             <div id="game-info" class="absolute top-4 right-4 bg-black/30 p-3 rounded text-right">
+                <div class="font-bold">Số dư: <span id="player-balance" class="text-accent"></span></div>
+                <div id="current-bet-display" class="font-bold mt-2">Đang cược: <span class="text-accent">0đ</span></div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // --- GAME STATE ---
+        let balance = 1250000;
+        let currentBetAmount = 0;
+        let selectedBetType = null; // 'chan' or 'le'
+        let isGameInProgress = false;
+
+        // --- DOM ELEMENTS ---
+        const plateEl = document.getElementById('plate-img'); // Updated to target the img tag
+        const coins = [document.getElementById('coin1'), document.getElementById('coin2'), document.getElementById('coin3'), document.getElementById('coin4')];
+        const betChanBtn = document.getElementById('bet-chan');
+        const betLeBtn = document.getElementById('bet-le');
+        const notificationBanner = document.getElementById('notification-banner');
+        
+        const bettingOverlay = document.getElementById('betting-overlay');
+        const bettingBalanceEl = document.getElementById('betting-balance');
+        const betAmountInput = document.getElementById('bet-amount-input');
+        const placeBetBtn = document.getElementById('place-bet-btn');
+        const playerBalanceEl = document.getElementById('player-balance');
+        const currentBetDisplay = document.getElementById('current-bet-display');
+        const quickBetBtns = document.querySelectorAll('.quick-bet-btn');
+        
+        // --- UI & FORMATTING ---
+        function formatCurrency(value) { return value.toLocaleString('vi-VN') + 'đ'; }
+        
+        function updateBalanceUI() {
+            playerBalanceEl.textContent = formatCurrency(balance);
+            bettingBalanceEl.textContent = formatCurrency(balance);
+        }
+        
+        function showNotification(message, type = 'normal', duration = 2000) {
+            notificationBanner.textContent = message;
+            notificationBanner.classList.remove('text-green-400', 'text-red-500');
+            if (type === 'win') notificationBanner.classList.add('text-green-400');
+            if (type === 'lose') notificationBanner.classList.add('text-red-500');
+            
+            notificationBanner.style.opacity = '1';
+            setTimeout(() => {
+                notificationBanner.style.opacity = '0';
+            }, duration);
+        }
+
+        function showBettingModal() {
+            if (isGameInProgress) return;
+            updateBalanceUI();
+            bettingOverlay.classList.remove('hidden');
+            betAmountInput.value = '';
+        }
+
+        // --- GAME LOGIC ---
+        function handlePlaceBet() {
+            const betValue = parseInt(betAmountInput.value);
+            if (isNaN(betValue) || betValue <= 0) { alert("Vui lòng nhập số tiền cược hợp lệ."); return; }
+            if (betValue > balance) { alert("Số dư không đủ."); return; }
+            if (!selectedBetType) { alert("Vui lòng chọn CHẴN hoặc LẺ."); return; }
+            
+            currentBetAmount = betValue;
+            balance -= currentBetAmount;
+            
+            updateBalanceUI();
+            currentBetDisplay.innerHTML = `Đang cược: <span class="text-accent">${formatCurrency(currentBetAmount)}</span>`;
+            
+            bettingOverlay.classList.add('hidden');
+            startGame();
+        }
+
+        function selectBetType(type) {
+            if (isGameInProgress) return;
+            selectedBetType = type;
+            
+            betChanBtn.classList.remove('selected');
+            betLeBtn.classList.remove('selected');
+            if (type === 'chan') betChanBtn.classList.add('selected');
+            if (type === 'le') betLeBtn.classList.add('selected');
+            
+            showBettingModal();
+        }
+
+        function startGame() {
+            isGameInProgress = true;
+            plateEl.classList.remove('open');
+            
+            // Hide previous coins
+            coins.forEach(c => c.className = 'coin');
+
+            setTimeout(() => {
+                plateEl.classList.add('shaking');
+            }, 500); // Wait for plate to close
+            
+            setTimeout(() => {
+                plateEl.classList.remove('shaking');
+                revealResult();
+            }, 2000); // Shake for 1.5s
+        }
+
+        function revealResult() {
+            let redCount = 0;
+            const results = [];
+            for (let i = 0; i < 4; i++) {
+                const isRed = Math.random() < 0.5;
+                if (isRed) redCount++;
+                results.push(isRed ? 'red' : 'white');
+            }
+
+            // Display coins
+            coins.forEach((coin, i) => {
+                coin.classList.add(results[i]);
+            });
+            
+            plateEl.classList.add('open');
+
+            // Determine winner
+            const isEven = redCount % 2 === 0;
+            const resultType = isEven ? 'chan' : 'le';
+
+            setTimeout(() => {
+                if (resultType === selectedBetType) {
+                    const winnings = currentBetAmount * 1.95;
+                    balance += winnings;
+                    showNotification(`Thắng! +${formatCurrency(winnings)}`, 'win');
+                } else {
+                    showNotification('Thua!', 'lose');
+                }
+                
+                // Reset for next round
+                currentBetAmount = 0;
+                selectedBetType = null;
+                isGameInProgress = false;
+                betChanBtn.classList.remove('selected');
+                betLeBtn.classList.remove('selected');
+                updateBalanceUI();
+                currentBetDisplay.innerHTML = `Đang cược: <span class="text-accent">0đ</span>`;
+            }, 1000); // Wait 1s after reveal to show result
+        }
+        
+        function handleQuickBet(event) {
+            const amount = event.target.dataset.amount;
+            betAmountInput.value = amount;
+        }
+
+        // --- INITIALIZE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBalanceUI();
+            betChanBtn.addEventListener('click', () => selectBetType('chan'));
+            betLeBtn.addEventListener('click', () => selectBetType('le'));
+            placeBetBtn.addEventListener('click', handlePlaceBet);
+            quickBetBtns.forEach(btn => btn.addEventListener('click', handleQuickBet));
+        });
+    </script>
+</body>
+</html>
+

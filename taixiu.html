@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tài Xỉu - Mẫu</title>
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a modern, clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Reusing the theme from the main page for consistency */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d0e1b;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .bg-primary { background-color: #1a1c33; }
+        .bg-secondary { background-color: #2a2d4e; }
+        .text-accent { color: #ffc400; }
+        .border-accent { border-color: #ffc400; }
+
+        .btn-gradient {
+            background-image: linear-gradient(to right, #ffc400 0%, #ff8a00 51%, #ffc400 100%);
+            background-size: 200% auto;
+            transition: all 0.3s ease-out;
+            color: #1a1c33;
+            font-weight: 700;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px 0 rgba(255, 196, 0, 0.3);
+        }
+        .btn-gradient:hover {
+            background-position: right center;
+            box-shadow: 0 6px 20px 0 rgba(255, 196, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-gradient:disabled {
+            background-image: none;
+            background-color: #555;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Styles specific to the game board UI */
+        .bet-option {
+            border: 4px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .bet-option.selected {
+            border-color: #ffc400;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ffc400;
+        }
+        .bet-option.winner {
+             animation: winner-pulse 1s infinite;
+        }
+        .bet-option.loser {
+            opacity: 0.5;
+            filter: grayscale(80%);
+        }
+
+        @keyframes winner-pulse {
+            0% { transform: scale(1.05); box-shadow: 0 0 20px #ffc400; }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px #00ff88; }
+            100% { transform: scale(1.05); box-shadow: 0 0 20px #ffc400; }
+        }
+
+        /* Dice animation effect */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .dice-bowl.shaking {
+            animation: shake 0.5s infinite;
+        }
+        .dice {
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+        }
+    </style>
+</head>
+<body class="bg-primary">
+
+    <!-- Simple Header for the game page -->
+    <header class="bg-primary/80 backdrop-blur-sm shadow-lg w-full">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="188bet.html" class="text-2xl font-black text-accent tracking-wider">
+                Greenwich88<span class="text-white">.bet</span>
+            </a>
+            <div class="text-right">
+                <div class="font-semibold text-white">Xin chào, <span id="username">Player123</span></div>
+                <div class="text-accent font-bold">Số dư: <span id="balance">10,000,000</span>đ</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 flex-grow flex items-center justify-center">
+        <div class="w-full max-w-4xl bg-secondary p-6 rounded-2xl shadow-2xl">
+            <!-- Game Display Area -->
+            <div class="grid grid-cols-3 gap-6 items-center mb-6">
+                <!-- Betting option: XỈU -->
+                <div id="bet-xiu" class="bet-option bg-blue-900/50 p-6 rounded-xl text-center" onclick="selectBet('xiu')">
+                    <h2 class="text-5xl font-black text-blue-300">XỈU</h2>
+                    <p class="text-blue-200">4-10 Điểm</p>
+                    <div class="mt-2">Tổng cược: <span id="total-bet-xiu" class="font-bold">0</span>đ</div>
+                </div>
+
+                <!-- Dice Bowl & Timer -->
+                <div class="text-center">
+                    <div id="dice-bowl" class="dice-bowl relative h-40 w-40 mx-auto bg-black/20 rounded-full flex items-center justify-center mb-4">
+                        <div id="dice-result" class="hidden space-x-2">
+                             <div id="dice1" class="dice">?</div>
+                             <div id="dice2" class="dice">?</div>
+                             <div id="dice3" class="dice">?</div>
+                        </div>
+                         <div id="bowl-cover">
+                            <h3 class="text-xl font-bold">Vui lòng chờ...</h3>
+                         </div>
+                    </div>
+                    <div class="bg-black/30 rounded-full px-6 py-2">
+                        <div class="text-sm">Phiên mới sau:</div>
+                        <div id="timer" class="text-3xl font-bold text-accent">20</div>
+                    </div>
+                </div>
+
+                <!-- Betting option: TÀI -->
+                <div id="bet-tai" class="bet-option bg-red-900/50 p-6 rounded-xl text-center" onclick="selectBet('tai')">
+                    <h2 class="text-5xl font-black text-red-300">TÀI</h2>
+                    <p class="text-red-200">11-17 Điểm</p>
+                    <div class="mt-2">Tổng cược: <span id="total-bet-tai" class="font-bold">0</span>đ</div>
+                </div>
+            </div>
+            
+             <!-- Notification Area -->
+            <div id="notification" class="text-center h-8 mb-4 text-xl font-bold transition-opacity duration-300"></div>
+
+            <!-- Betting Controls -->
+            <div class="bg-primary p-4 rounded-lg flex flex-col md:flex-row items-center justify-center gap-4">
+                <div class="flex-shrink-0 font-bold">Số tiền cược:</div>
+                <div class="flex-grow grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto">
+                    <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded" onclick="setBetAmount(10000)">10K</button>
+                    <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded" onclick="setBetAmount(50000)">50K</button>
+                    <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded" onclick="setBetAmount(100000)">100K</button>
+                    <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded" onclick="setBetAmount(500000)">500K</button>
+                </div>
+                <input id="bet-amount-input" type="number" placeholder="Nhập số tiền khác" class="bg-gray-900 text-white p-2 rounded border border-gray-600 text-center w-full md:w-auto">
+                <button id="confirm-bet-btn" class="btn-gradient px-10 py-3 text-lg w-full md:w-auto" onclick="confirmBet()">Đặt Cược</button>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // --- GAME STATE ---
+        let balance = 1250000;
+        let currentBet = { type: null, amount: 0, confirmed: false };
+        let countdown = 20;
+        let timerInterval;
+
+        // --- DOM ELEMENTS ---
+        const balanceEl = document.getElementById('balance');
+        const timerEl = document.getElementById('timer');
+        const betTaiEl = document.getElementById('bet-tai');
+        const betXiuEl = document.getElementById('bet-xiu');
+        const betAmountInput = document.getElementById('bet-amount-input');
+        const confirmBetBtn = document.getElementById('confirm-bet-btn');
+        const notificationEl = document.getElementById('notification');
+        const diceBowlEl = document.getElementById('dice-bowl');
+        const diceResultEl = document.getElementById('dice-result');
+        const bowlCoverEl = document.getElementById('bowl-cover');
+        const diceEls = [document.getElementById('dice1'), document.getElementById('dice2'), document.getElementById('dice3')];
+
+        // --- HELPER FUNCTIONS ---
+        function formatCurrency(value) {
+            return value.toLocaleString('vi-VN');
+        }
+
+        function updateBalanceUI() {
+            balanceEl.textContent = formatCurrency(balance);
+        }
+
+        function showNotification(message, colorClass = 'text-white') {
+            notificationEl.textContent = message;
+            notificationEl.className = `text-center h-8 mb-4 text-xl font-bold transition-opacity duration-300 ${colorClass}`;
+        }
+        
+        // --- GAME LOGIC ---
+        function selectBet(type) {
+            if (currentBet.confirmed) return; // Cannot change bet after confirming
+
+            currentBet.type = type;
+            betTaiEl.classList.remove('selected');
+            betXiuEl.classList.remove('selected');
+
+            if (type === 'tai') {
+                betTaiEl.classList.add('selected');
+            } else if (type === 'xiu') {
+                betXiuEl.classList.add('selected');
+            }
+        }
+
+        function setBetAmount(amount) {
+            if (currentBet.confirmed) return;
+            betAmountInput.value = amount;
+        }
+
+        function confirmBet() {
+            const amount = parseInt(betAmountInput.value);
+            
+            if (currentBet.confirmed) {
+                showNotification("Bạn đã cược phiên này rồi!", 'text-yellow-400');
+                return;
+            }
+            if (!currentBet.type) {
+                showNotification("Vui lòng chọn TÀI hoặc XỈU!", 'text-yellow-400');
+                return;
+            }
+            if (isNaN(amount) || amount <= 0) {
+                showNotification("Số tiền cược không hợp lệ!", 'text-yellow-400');
+                return;
+            }
+            if (amount > balance) {
+                showNotification("Số dư không đủ!", 'text-red-500');
+                return;
+            }
+
+            currentBet.amount = amount;
+            currentBet.confirmed = true;
+            balance -= amount;
+            updateBalanceUI();
+            
+            // This is a simple visual representation of total bets.
+            // In a real app, this would come from a server.
+            const totalBetEl = document.getElementById(`total-bet-${currentBet.type}`);
+            let currentTotal = parseInt(totalBetEl.textContent.replace(/,/g, ''));
+            totalBetEl.textContent = formatCurrency(currentTotal + amount);
+
+
+            showNotification(`Đã cược ${formatCurrency(amount)} vào ${currentBet.type.toUpperCase()}`, 'text-green-400');
+            confirmBetBtn.disabled = true;
+        }
+
+        function startBettingPhase() {
+            countdown = 20;
+            currentBet = { type: null, amount: 0, confirmed: false };
+            
+            // Reset UI
+            showNotification("Mời bạn đặt cược", "text-white");
+            betTaiEl.classList.remove('selected', 'winner', 'loser');
+            betXiuEl.classList.remove('selected', 'winner', 'loser');
+            betAmountInput.value = '';
+            confirmBetBtn.disabled = false;
+            diceResultEl.classList.add('hidden');
+            bowlCoverEl.classList.remove('hidden');
+            bowlCoverEl.innerHTML = '<h3 class="text-xl font-bold">Mời cược...</h3>';
+
+
+            timerInterval = setInterval(() => {
+                countdown--;
+                timerEl.textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    startRollingPhase();
+                }
+            }, 1000);
+        }
+
+        function startRollingPhase() {
+            showNotification("Đang lắc xúc xắc...", "text-yellow-400");
+            timerEl.textContent = "!!!";
+            confirmBetBtn.disabled = true;
+            diceBowlEl.classList.add('shaking');
+            bowlCoverEl.innerHTML = '<h3 class="text-xl font-bold animate-pulse">LẮC...</h3>';
+
+            setTimeout(() => {
+                diceBowlEl.classList.remove('shaking');
+                resolveRoll();
+            }, 2000); // Shake for 2 seconds
+        }
+
+        function resolveRoll() {
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            const d3 = Math.floor(Math.random() * 6) + 1;
+            const sum = d1 + d2 + d3;
+            let result;
+
+            if (d1 === d2 && d1 === d3) {
+                result = 'triple'; // House wins on triples
+            } else if (sum >= 4 && sum <= 10) {
+                result = 'xiu';
+            } else {
+                result = 'tai';
+            }
+
+            // Display dice
+            diceEls[0].textContent = d1;
+            diceEls[1].textContent = d2;
+            diceEls[2].textContent = d3;
+            bowlCoverEl.classList.add('hidden');
+            diceResultEl.classList.remove('hidden');
+            
+            // Update UI with results
+            const resultText = `${sum} Điểm - ${result.toUpperCase()}`;
+            if (result === 'tai') betTaiEl.classList.add('winner');
+            if (result === 'xiu') betXiuEl.classList.add('winner');
+            if (result !== 'tai') betTaiEl.classList.add('loser');
+            if (result !== 'xiu') betXiuEl.classList.add('loser');
+
+
+            // Payout
+            if (currentBet.confirmed) {
+                if (currentBet.type === result) {
+                    const winnings = currentBet.amount * 1.95; // Example payout
+                    balance += winnings;
+                    showNotification(`Thắng! +${formatCurrency(winnings)}`, 'text-green-400');
+                } else {
+                    showNotification(`Thua! ${resultText}`, 'text-red-500');
+                }
+            } else {
+                 showNotification(`Kết quả: ${resultText}`, 'text-white');
+            }
+            updateBalanceUI();
+
+            // Start next round after a delay
+            setTimeout(startBettingPhase, 5000);
+        }
+
+        // --- INITIALIZE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBalanceUI();
+            startBettingPhase();
+        });
+    </script>
+</body>
+</html>
