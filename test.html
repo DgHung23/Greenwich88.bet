@@ -1,0 +1,144 @@
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    
+
+    <style>
+        /* This custom CSS block demonstrates techniques often used for visual flair */
+
+        /* Common dark, luxurious theme with gold and vibrant accents */
+        .bg-primary { background-color: #1a1c33; }
+        .bg-secondary { background-color: #2a2d4e; }
+        .bg-accent, .hover\:bg-accent-dark:hover { background-color: #ffc400; }
+        .text-accent { color: #ffc400; }
+
+
+
+        /* Deposit Modal Styles */
+        .modal-overlay {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d0e1b;
+            color: #e0e0e0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-box {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-hidden .modal-box {
+            transform: scale(0.95);
+        }
+        .modal-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-visible .modal-box {
+            transform: scale(1);
+        }
+        .glowing-border {
+            border: 2px solid #ffc400;
+            animation: glowing-border 2s infinite ease-in-out;
+        }
+
+        @keyframes glowing-border {
+            0% { box-shadow: 0 0 8px #ffc400, inset 0 0 8px #ffc400; }
+            50% { box-shadow: 0 0 16px #ff8a00, inset 0 0 16px #ff8a00; }
+            100% { box-shadow: 0 0 8px #ffc400, inset 0 0 8px #ffc400; }
+        }
+    </style>
+</head>
+
+                <button id="deposit-btn" class="btn-gradient px-4 py-2 text-sm">Nạp Tiền</button>
+
+
+    <main class="container mx-auto px-4 py-8">
+
+
+    <div id="deposit-modal-overlay" class="modal-overlay modal-hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="modal-box bg-primary p-8 rounded-xl glowing-border relative w-full max-w-3xl">
+            <button id="close-deposit-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="text-3xl font-bold text-accent mb-6 text-center">Tạo Lệnh Nạp Tiền</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+
+                <div class="space-y-4">
+                    <p class="text-gray-300">Chuyển khoản đến thông tin bên dưới để nạp tiền vào tài khoản của bạn.</p>
+                    <div class="bg-secondary p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-400">Ngân hàng</span>
+                            <strong class="text-white">MBbank</strong>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Số tài khoản</span>
+                            <div class="flex items-center gap-2">
+                                <strong id="account-number" class="text-white text-lg">0912579488</strong>
+                                <button onclick="copyToClipboard('account-number')" class="copy-btn bg-gray-600 p-1 rounded-md hover:bg-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400">Chủ tài khoản</span>
+                            <strong class="text-white">DANG GIA HUNG</strong>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400">Nội dung</span>
+                            <div class="flex items-center gap-2">
+                                <strong id="deposit-content" class="text-accent text-lg">dghung22342</strong>
+                                 <button onclick="copyToClipboard('deposit-content')" class="copy-btn bg-gray-600 p-1 rounded-md hover:bg-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-yellow-500/80 text-center">Lưu ý: Vui lòng ghi đúng nội dung chuyển khoản để giao dịch được xử lý tự động.</p>
+                </div>
+
+                <div class="flex items-center justify-center">
+                    <img src="./asset/qr.png" alt="QR Code Ngân hàng" class="rounded-lg border-4 border-white">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const depositBtn = document.getElementById('deposit-btn');
+        const depositModalOverlay = document.getElementById('deposit-modal-overlay');
+        const closeDepositModalBtn = document.getElementById('close-deposit-modal-btn');
+
+        depositBtn.addEventListener('click', () => {
+            depositModalOverlay.classList.remove('modal-hidden');
+            depositModalOverlay.classList.add('modal-visible');
+        });
+
+        function closeModal() {
+            depositModalOverlay.classList.remove('modal-visible');
+            depositModalOverlay.classList.add('modal-hidden');
+        }
+
+        closeDepositModalBtn.addEventListener('click', closeModal);
+
+        depositModalOverlay.addEventListener('click', (e) => {
+            if (e.target === depositModalOverlay) {
+                closeModal();
+            }
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            // A temporary textarea is created to execute the copy command
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert(`Đã sao chép: ${textToCopy}`);
+        }
+    </script>

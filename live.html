@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PokerNight Live — Casino UI</title>
-
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Greenwich88 Casino Live</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
   :root{
     --bg:#12071a;
     --accent:#ffd400;
@@ -15,172 +15,549 @@
     font-family: Inter, system-ui, sans-serif;
   }
   body{margin:0;background:var(--bg);color:#eee;}
-  .wrap{display:flex;gap:20px;max-width:1200px;margin:28px auto;padding:20px;}
+  header{display:flex;justify-content:space-between;align-items:center;
+    max-width:1200px;margin:0 auto;padding:12px 20px;}
+  .wrap{display:flex;gap:20px;max-width:1200px;margin:10px auto;padding:20px;}
   .left{flex:1;display:flex;flex-direction:column;gap:16px;}
   .right{width:320px;display:flex;flex-direction:column;gap:16px;}
   .brand{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;
     background:var(--glass);border:1px solid rgba(255,255,255,0.03);}
-  .logo{width:56px;height:56px;border-radius:10px;background:#2b0630;
+  .logo{width:56px;height:56px;border-radius:10px;background-image:url(./asset/logo.png);
     display:flex;align-items:center;justify-content:center;font-weight:800;
-    color:var(--accent);font-size:20px;}
+    color:var(--accent);font-size:20px;background-size: cover;}
   .brand .title{font-size:18px;font-weight:700;}
   .player-card{background:var(--glass);border-radius:var(--card-radius);
-    overflow:hidden;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;height:620px;}
+    overflow:hidden;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;height:auto;} /* Changed height to auto */
   .player-top{display:flex;justify-content:space-between;align-items:center;
     padding:12px 16px;border-bottom:1px dashed rgba(255,255,255,0.02)}
   .live-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;
     border-radius:999px;background:#9b0036;font-weight:700}
   .live-dot{width:10px;height:10px;background:#ff6b6b;border-radius:50%;}
-  .player-iframe{flex:1;background:#000;display:flex;align-items:center;justify-content:center;position:relative}
-  .player-iframe iframe{width:100%;height:100%;border:0;background:#000}
-  .link-input{display:flex;gap:8px;padding:10px;border-top:1px dashed rgba(255,255,255,0.05);}
-  .link-input input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#1b0b1a;color:#fff}
-  .controls{display:flex;gap:10px;padding:12px;align-items:center;
+  .player-iframe-wrapper{ /* New wrapper for 16:9 aspect ratio */
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio (9/16 * 100%) */
+    background: #000;
+  }
+  .player-iframe-wrapper iframe{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .input-wrap{display:flex;gap:8px;margin:10px 0;padding:0 16px;}
+  .input-wrap input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#1b0b1a;color:#fff}
+  .warn{color:#ff8080;font-size:13px;padding:0 16px;}
+  .controls{display:flex;flex-direction:column;gap:12px;padding:12px;align-items:flex-start;
     border-top:1px dashed rgba(255,255,255,0.02)}
-  .chip{background:#3e103e;padding:12px 18px;border-radius:12px;
-    border:1px solid rgba(255,255,255,0.04);font-weight:700}
+  .chip{background:#3e103e;padding:10px 14px;border-radius:12px;
+    border:1px solid rgba(255,255,255,0.04);font-weight:700;margin-bottom:6px}
   .btn{background:linear-gradient(90deg,var(--accent),#ffda64);color:#1b0b1a;
     padding:10px 14px;border-radius:10px;border:0;font-weight:800;cursor:pointer}
+  .btn:disabled{background:var(--muted);color:#333;cursor:not-allowed;}
   .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);
     color:var(--accent);}
+  .bet-options{display:flex;gap:8px;flex-wrap:wrap;}
+  .bet-options button, .bet-options input{padding:8px 12px;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.2);background:#1b0b1a;color:#fff;cursor:pointer;}
+  .bet-options input{width:80px;}
+  .player-select {display:flex; gap:8px; margin-bottom:12px;}
+  .player-btn {padding:8px 12px;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.2);background:#1b0b1a;color:#fff;cursor:pointer;}
+  .player-btn.selected {background:var(--accent); color:#1b0b1a; font-weight:bold; border-color:var(--accent);}
   .panel{background:var(--glass);padding:14px;border-radius:12px;
-    border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:10px}
-  .panel h4{margin:0;color:var(--accent)}
+    border:1px solid rgba(255,255,255,0.03)}
+  .panel h4{margin:0 0 8px;color:var(--accent)}
   .balance{font-size:28px;font-weight:900;color:var(--accent);}
-  .chat{flex:1;overflow:auto;padding:10px;background:var(--glass);border-radius:8px;font-size:14px;}
-  .chat-message{margin-bottom:6px;}
-  .chat strong{color:var(--accent);}
-  .chat-input-wrap{display:flex;gap:6px;}
-  .chat-input-wrap input{flex:1;padding:8px;border-radius:8px;
-    border:1px solid rgba(255,255,255,0.1);background:#1b0b1a;color:#fff}
+  .mini-list{display:flex;flex-direction:column;gap:10px; max-height: 250px; overflow-y: auto;} /* Added max-height and overflow-y */
+  .mini-item{display:flex;justify-content:space-between;align-items:center;
+    padding:8px;border-radius:8px;background:var(--glass);font-weight:700; transition: all 0.3s ease;}
+  .mini-item .status-win { color: #6bff6b; }
+  .mini-item .status-loss { color: #ff6b6b; }
+  .chat{height:280px;overflow:auto;padding:10px;background:var(--glass);border-radius:8px}
+  .chat-message{margin:4px 0;opacity:0;animation:fadeIn 0.6s forwards;}
+  .chat-message strong{color:var(--accent);}
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(6px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .chat-message{animation:fadeIn 0.6s forwards, glow 1.2s ease;}
+  @keyframes chat-glow{ /* Renamed to avoid conflict */
+    0%{text-shadow:0 0 6px var(--accent);}
+    100%{text-shadow:none;}
+  }
+  .chat-input{display:flex;gap:8px;margin-top:8px;}
+  .chat-input input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#1b0b1a;color:#fff}
+  .chat-input button{padding:8px 12px;border-radius:8px;background:var(--accent);border:0;font-weight:700;cursor:pointer}
   footer{max-width:1200px;margin:12px auto;color:var(--muted);font-size:13px;text-align:center}
-  @media(max-width:980px){.wrap{flex-direction:column}.right{width:100%}.player-card{height:480px}}
+  @media(max-width:980px){.wrap{flex-direction:column}.right{width:100%}.player-card{height:auto}} /* Changed height to auto */
+  .wrap{
+    margin-top: -20px;
+  }
+  /* Gambling Pop-up Styles */
+  .result-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(45deg, #3e103e, #2b0630);
+    color: white;
+    padding: 25px 40px;
+    border-radius: 15px;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px var(--accent), 0 0 10px var(--accent) inset;
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    pointer-events: none; /* Make it unclickable */
+  }
+
+  .result-popup.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+
+  .result-popup.win {
+    color: #6bff6b;
+    border-color: #6bff6b;
+    box-shadow: 0 0 20px #6bff6b, 0 0 10px #6bff6b inset;
+  }
+
+  .result-popup.loss {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 20px #ff6b6b, 0 0 10px #ff6b6b inset;
+  }
+
+  /* Custom Scrollbar for Recent Bets */
+  .mini-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  .mini-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+  .mini-list::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+  }
+  .mini-list::-webkit-scrollbar-thumb:hover {
+    background: #ffda64;
+  }
+
+  /* Deposit Modal Styles (unchanged) */
+  body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d0e1b;
+            color: #e0e0e0;
+        }
+
+        /* Common dark, luxurious theme with gold and vibrant accents */
+        .bg-primary { background-color: #1a1c33; }
+        .bg-secondary { background-color: #2a2d4e; }
+        .bg-accent, .hover\:bg-accent-dark:hover { background-color: #ffc400; }
+        .text-accent { color: #ffc400; }
+        .border-accent { border-color: #ffc400; }
+
+
+
+        /* Deposit Modal Styles */
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-box {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-hidden .modal-box {
+            transform: scale(0.95);
+        }
+        .modal-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-visible .modal-box {
+            transform: scale(1);
+        }
+        .glowing-border {
+            border: 2px solid #ffc400;
+            animation: glowing-border 2s infinite ease-in-out;
+        }
+
+        @keyframes glowing-border {
+            0% { box-shadow: 0 0 8px #ffc400, inset 0 0 8px #ffc400; }
+            50% { box-shadow: 0 0 16px #ff8a00, inset 0 0 16px #ff8a00; }
+            100% { box-shadow: 0 0 8px #ffc400, inset 0 0 8px #ffc400; }
+        }
 </style>
 </head>
 <body>
 
+<header>
+  <div></div>
+
+</header>
+
 <div class="wrap">
   <div class="left">
     <div class="brand">
-      <div class="logo">PN</div>
+      <a href="./index.html" class="logo"></a>
       <div>
-        <div class="title">PokerNight Live</div>
-        <div style="font-size:12px;color:var(--muted)">Casino style demo</div>
+        <div class="title">Greenwich Casino</div>
+        <a href="./index.html" style="font-size:12px;color:var(--muted)">Ấn để về trang chủ</a>
       </div>
     </div>
 
     <div class="player-card">
       <div class="player-top">
         <div class="live-badge"><span class="live-dot"></span><span>LIVE</span></div>
-        <div style="color:var(--muted);font-weight:700">Đang phát trực tiếp</div>
+        <div style="color:var(--muted);font-weight:700">Now streaming</div>
       </div>
-      <div class="player-iframe">
-        <iframe id="ytPlayer" allowfullscreen></iframe>
+      <div class="player-iframe-wrapper"> <iframe id="ytPlayer" allowfullscreen></iframe>
       </div>
-      <div class="link-input">
-        <input type="text" id="linkInput" placeholder="Dán link livestream YouTube..." />
-        <button class="btn ghost" id="loadBtn">Tải</button>
+      <div class="input-wrap">
+        <input type="text" id="videoLink" placeholder="Paste YouTube livestream link..." />
+        <button class="btn ghost" id="loadBtn">Load</button>
       </div>
+      <div class="warn" id="warnBox"></div>
       <div class="controls">
-        <div class="chip">Cược: <span id="betAmount">50</span> ₫</div>
-        <button class="btn" id="betBtn">ĐẶT CƯỢC</button>
+        <div class="player-select" id="player-select">
+            <button class="player-btn selected" data-player="A">Người chơi A</button>
+            <button class="player-btn" data-player="B">Người chơi B</button>
+            <button class="player-btn" data-player="C">Người chơi C</button>
+            <button class="player-btn" data-player="D">Người chơi D</button>
+        </div>
+        <div class="chip">Bet: <span id="betAmount">50,000</span> ₫</div>
+        <div class="bet-options">
+          <button data-bet="20000">20k</button>
+          <button data-bet="50000">50k</button>
+          <button data-bet="500000">500k</button>
+          <input type="number" id="customBet" placeholder="Khác">
+        </div>
+        <button class="btn" id="betBtn">PLACE BET</button>
       </div>
     </div>
   </div>
 
   <div class="right">
-    <div class="panel" style="height:480px;">
-      <h4>Chat</h4>
-      <div class="chat" id="chatBox"></div>
-      <div class="chat-input-wrap">
-        <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." />
-        <button class="btn ghost" id="chatSend">Gửi</button>
+    <div class="panel">
+      <h4>Balance</h4>
+      <div class="balance" id="balance">1,250,000 VND</div>
+      <div style="margin-top:10px">
+        <button class="btn" id="deposit-btn">Nạp Tiền</button>
       </div>
     </div>
-
     <div class="panel">
-      <h4>Số dư</h4>
-      <div class="balance" id="balance">1,250</div>
-      <button class="btn" id="addChip">Mua thêm chip</button>
+      <h4>Chat</h4>
+      <div class="chat" id="chatBox"></div>
+      <div class="chat-input">
+        <input type="text" id="userMsg" placeholder="Nhập tin nhắn..."/>
+        <button id="sendBtn">Gửi</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h4>Lịch sử cược</h4>
+      <div class="mini-list" id="betsList">
+        </div>
     </div>
   </div>
 </div>
 
-<footer>Demo casino UI — livestream có thể đổi link, chat auto random + người dùng gửi.</footer>
+<div id="result-popup" class="result-popup"></div>
+
+    <div id="deposit-modal-overlay" class="modal-overlay modal-hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="modal-box bg-primary p-8 rounded-xl glowing-border relative w-full max-w-3xl">
+            <button id="close-deposit-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="text-3xl font-bold text-accent mb-6 text-center">Tạo Lệnh Nạp Tiền</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+
+                <div class="space-y-4">
+                    <p class="text-gray-300">Chuyển khoản đến thông tin bên dưới để nạp tiền vào tài khoản của bạn.</p>
+                    <div class="bg-secondary p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-400">Ngân hàng</span>
+                            <strong class="text-white">MBbank</strong>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Số tài khoản</span>
+                            <div class="flex items-center gap-2">
+                                <strong id="account-number" class="text-white text-lg">0912579488</strong>
+                                <button onclick="copyToClipboard('account-number')" class="copy-btn bg-gray-600 p-1 rounded-md hover:bg-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400">Chủ tài khoản</span>
+                            <strong class="text-white">DANG GIA HUNG</strong>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400">Nội dung</span>
+                            <div class="flex items-center gap-2">
+                                <strong id="deposit-content" class="text-accent text-lg">dghung22342</strong>
+                                 <button onclick="copyToClipboard('deposit-content')" class="copy-btn bg-gray-600 p-1 rounded-md hover:bg-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-yellow-500/80 text-center">Lưu ý: Vui lòng ghi đúng nội dung chuyển khoản để giao dịch được xử lý tự động.</p>
+                </div>
+
+                <div class="flex items-center justify-center">
+                    <img src="./asset/qr.png" alt="QR Code Ngân hàng" class="rounded-lg border-4 border-white">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const depositBtn = document.getElementById('deposit-btn');
+        const depositModalOverlay = document.getElementById('deposit-modal-overlay');
+        const closeDepositModalBtn = document.getElementById('close-deposit-modal-btn');
+
+        depositBtn.addEventListener('click', () => {
+            depositModalOverlay.classList.remove('modal-hidden');
+            depositModalOverlay.classList.add('modal-visible');
+        });
+
+        function closeModal() {
+            depositModalOverlay.classList.remove('modal-visible');
+            depositModalOverlay.classList.add('modal-hidden');
+        }
+
+        closeDepositModalBtn.addEventListener('click', closeModal);
+
+        depositModalOverlay.addEventListener('click', (e) => {
+            if (e.target === depositModalOverlay) {
+                closeModal();
+            }
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert(`Đã sao chép: ${textToCopy}`);
+        }
+    </script>
 
 <script>
 const player = document.getElementById('ytPlayer');
+const warnBox = document.getElementById('warnBox');
+
 // default video
 setVideo("https://www.youtube.com/watch?v=pxp8dgTAQPo");
+
+document.getElementById('loadBtn').addEventListener('click', ()=>{
+  const url = document.getElementById('videoLink').value.trim();
+  if(!url){warnBox.textContent="Vui lòng dán link.";return;}
+  const videoId = extractVideoId(url);
+  if(videoId){
+    setVideo("https://www.youtube.com/watch?v="+videoId);
+    warnBox.textContent="";
+  }else{
+    warnBox.textContent="⚠️ Link YouTube không hợp lệ.";
+  }
+});
+
 function extractVideoId(url){
   try{
     const u = new URL(url);
     if(u.hostname.includes("youtube.com")){
       if(u.searchParams.get("v")) return u.searchParams.get("v");
+      if(u.pathname.startsWith("/live/")) return u.pathname.split("/live/")[1];
     }
-    if(u.hostname==="youtu.be"){ return u.pathname.slice(1); }
+    if(u.hostname==="youtu.be"){
+      return u.pathname.slice(1);
+    }
   }catch(e){}
   return null;
 }
+
 function setVideo(link){
   const id = extractVideoId(link);
-  if(id){ player.src = "https://www.youtube.com/embed/"+id+"?autoplay=1"; }
-  else { player.src = link; }
-}
-document.getElementById("loadBtn").onclick=()=>{
-  const link=document.getElementById("linkInput").value.trim();
-  if(link) setVideo(link);
-};
-
-// ===== Chat Logic =====
-const chatBox = document.getElementById("chatBox");
-const comments = [
-  "Chơi lớn đi anh em!", "Ván này căng thật!", "Hú hồn, tưởng thua rồi",
-  "Haha lừa được đối thủ luôn", "Tay này all-in đi!",
-  "Sảnh rồi kìa 😱", "Hên xui thôi, quất!", "Vui quá, đánh tiếp!",
-  "Đang xem mà hồi hộp ghê", "Ủa sao fold vậy trời?",
-  "Lật bài đi anh em!", "Quá gắt luôn ván này",
-  "Nhỏ mà có võ nha", "Mất hết chip rồi :(", "Đỉnh cao bluff",
-  "Hên thế không biết", "Ngồi im thôi chờ bài đẹp",
-  "Ủa sao né được hay vậy", "Streamer chơi đỉnh ghê", "Hòa vốn thôi cũng vui rồi"
-];
-const names = ["Duy Bảo","Nhật Nam","Quốc Trí","Gia_Hưng","Mahatan SHamilar","AHgaming","LêBách","AnhKhoi"];
-function addChatMessage(user, text){
-  const div = document.createElement("div");
-  div.className="chat-message";
-  div.innerHTML=`<strong>${user}:</strong> ${text}`;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-function randomComment(){
-  const user = names[Math.floor(Math.random()*names.length)];
-  const text = comments[Math.floor(Math.random()*comments.length)];
-  addChatMessage(user,text);
-}
-function scheduleRandom(){
-  const delay = (0+Math.random()*4)*1000; // 5-10s
-  setTimeout(()=>{
-    randomComment();
-    scheduleRandom();
-  },delay);
-}
-scheduleRandom();
-
-// user input
-document.getElementById("chatSend").onclick=()=>{
-  const input=document.getElementById("chatInput");
-  const msg=input.value.trim();
-  if(msg){
-    addChatMessage("Bạn",msg);
-    input.value="";
+  if(id){
+    player.src = "https://www.youtube.com/embed/"+id+"?autoplay=1";
+  }else{
+    player.src = link;
   }
-};
+}
 
-// ===== Balance demo =====
-let balance=1250;
-function updateBalance(){document.getElementById("balance").textContent=balance;}
-document.getElementById("addChip").onclick=()=>{balance+=500;updateBalance();}
-document.getElementById("betBtn").onclick=()=>{balance-=50;updateBalance();}
+// ====== NEW BETTING LOGIC ======
+let balance = 1250000;
+let currentBet = 50000;
+let selectedPlayer = 'A';
+let isBetting = false;
+let betIdCounter = 0;
+
+const balanceEl = document.getElementById("balance");
+const betAmountEl = document.getElementById("betAmount");
+const betBtn = document.getElementById("betBtn");
+const betsListEl = document.getElementById("betsList");
+const playerSelectEl = document.getElementById('player-select');
+const resultPopup = document.getElementById('result-popup'); // Get the popup element
+
+function updateBalanceDisplay() {
+    balanceEl.textContent = balance.toLocaleString() + " VND";
+}
+
+function updateBetAmountDisplay() {
+    betAmountEl.textContent = currentBet.toLocaleString();
+}
+
+// Player selection
+playerSelectEl.addEventListener('click', (e) => {
+    if (e.target.classList.contains('player-btn')) {
+        playerSelectEl.querySelector('.selected').classList.remove('selected');
+        e.target.classList.add('selected');
+        selectedPlayer = e.target.dataset.player;
+    }
+});
+
+// Bet amount selection
+document.querySelectorAll(".bet-options button[data-bet]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        currentBet = parseInt(btn.dataset.bet);
+        updateBetAmountDisplay();
+    });
+});
+
+document.getElementById("customBet").addEventListener("input", e => {
+    const val = parseInt(e.target.value);
+    if (val > 0) {
+        currentBet = val;
+        updateBetAmountDisplay();
+    }
+});
+
+// Function to show the result pop-up
+function showResultPopup(message, isWin) {
+    resultPopup.textContent = message;
+    resultPopup.classList.remove('win', 'loss'); // Clear previous classes
+    if (isWin) {
+        resultPopup.classList.add('win');
+    } else {
+        resultPopup.classList.add('loss');
+    }
+    resultPopup.classList.add('show');
+
+    setTimeout(() => {
+        resultPopup.classList.remove('show');
+    }, 2000); // Popup disappears after 2 seconds
+}
+
+// Place bet button
+betBtn.addEventListener("click", () => {
+    if (isBetting) return;
+    if (balance < currentBet) {
+        alert("Not enough balance to place this bet.");
+        return;
+    }
+
+    // Start cooldown
+    isBetting = true;
+    betBtn.disabled = true;
+    betBtn.textContent = 'WAITING...';
+
+    // Deduct bet amount and update balance
+    balance -= currentBet;
+    updateBalanceDisplay();
+    
+    // Add to recent bets as "Pending"
+    betIdCounter++;
+    const newBetId = 'bet-' + betIdCounter;
+    const betHtml = `
+        <div class="mini-item" id="${newBetId}">
+            <span>Cược người chơi ${selectedPlayer} (${currentBet.toLocaleString()})</span>
+            <span class="status">Pending...</span>
+        </div>`;
+    betsListEl.insertAdjacentHTML('afterbegin', betHtml);
+
+    // Resolve bet after random delay
+    const delay = Math.random() * (10000 - 4000) + 4000; // 4s to 10s
+    setTimeout(() => resolveBet(newBetId, currentBet), delay);
+});
+
+function resolveBet(betId, amount) {
+    const didWin = Math.random() > 0.5; // 50% chance to win
+    const betElement = document.getElementById(betId);
+    const statusElement = betElement.querySelector('.status');
+    let popupMessage = '';
+
+    if (didWin) {
+        const winnings = amount * 2; // Win pays 2x
+        balance += winnings;
+        popupMessage = `🎉 THẮNG ${winnings.toLocaleString()}!`;
+        statusElement.textContent = `+${winnings.toLocaleString()}`;
+        statusElement.classList.add('status-win');
+    } else {
+        popupMessage = `😢 THUA ${amount.toLocaleString()}!`;
+        statusElement.textContent = `-${amount.toLocaleString()}`;
+        statusElement.classList.add('status-loss');
+    }
+
+    showResultPopup(popupMessage, didWin); // Show the custom pop-up
+    updateBalanceDisplay();
+    
+    // End cooldown
+    isBetting = false;
+    betBtn.disabled = false;
+    betBtn.textContent = 'PLACE BET';
+}
+
+
+// ====== Chat ======
+const chatBox=document.getElementById("chatBox");
+const names=["Duy Bảo","NHật Nam6789","Quốc Tri88","Gia_Hưng","Mahatan SHamilar","AHgaming","LêBách9999","AnhKhoi","DiepThiNgocTran", "Danh_CongPhan8386"];
+const comments=[
+  "Hôm nay cược mạnh quá!", "Ai all-in chưa?", "Cảm giác hồi hộp vl 😅", "Trận này chắc win rồi.", "May quá, vừa kịp xem.", "Tay bài này căng nha!", "Ủa sao xui thế 😭", "Có ai theo cửa này ko?", "Đặt 50k thôi cho chắc.", "Xem stream chill ghê.", "Tới luôn bạn ơi!", "Căng cực luôn.", "Quá đã 😍", "Hên xui mà vui.", "All innnnnn", "Ngon quá trời.", "Có kèo gì hot ko?", "Đặt 500k run tay vl.", "Vãi cả game 😂", "Đêm nay không ngủ được!", "Thua nhưng vẫn vui 😎", "Win liền tay nha!", "Đặt all-in đi thôi.", "Chắc chắn thắng rồi.", "Hix, thua sạch 😭", "Căng não quá!", "Đặt cược nhỏ thôi cho an toàn.", "Ai rút trước?", "Sao bài mình xui vậy ta?", "Ăn liền đi!", "Chờ lượt tiếp theo.", "Thắng rồi mừng quá 😍", "Ván này căng đét!", "Ai theo theo luôn!", "Đặt cửa đỏ thôi.", "Xanh hay đỏ đây?", "Hên thôi chứ không chắc.", "Cược lớn thử cảm giác.", "Căng quá vl 😂", "Ai muốn theo tay này?", "Rút nốt đi bạn ơi.", "Tới lượt mình rồi!", "Ngồi nhìn cũng hồi hộp.", "Chốt cửa đỏ nhé!", "Trận này làm liều thôi.", "Thua cũng không sao.", "Win liên tục nè!", "Bài đẹp quá 😎", "Căng quá không thở nổi!", "Đặt tiếp 100k đi.", "Hên quá trúng liền.", "Tay này là all-in thôi.", "Ai theo theo liền đi!", "Ván này chắc ăn rồi.", "Game này điên vl 😂"
+];
+
+function addMessage(name,text){
+  const msg=document.createElement("div");
+  msg.className="chat-message";
+  msg.innerHTML=`<strong>${name}:</strong> ${text}`;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+function randomChat(){
+  const name=names[Math.floor(Math.random()*names.length)];
+  const text=comments[Math.floor(Math.random()*comments.length)];
+  addMessage(name,text);
+  const delay=(Math.random()*4)*1000 + 2000;
+  setTimeout(randomChat,delay);
+}
+setTimeout(randomChat,4000);
+
+// user send
+document.getElementById("sendBtn").addEventListener("click",()=>{
+  const val=document.getElementById("userMsg").value.trim();
+  if(val){
+    addMessage("Bạn",val);
+    document.getElementById("userMsg").value="";
+  }
+});
+
+// Initial setup
+updateBalanceDisplay();
+updateBetAmountDisplay();
 </script>
 </body>
 </html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greenwich88</title>
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a modern, clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons for UI elements -->
+    <script src="https://unpkg.com/lucide-react@0.395.0/dist/lucide-react.js"></script>
+    <style>
+        /* This custom CSS block demonstrates techniques often used for visual flair */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0d0e1b;
+            color: #e0e0e0;
+        }
+
+        /* Common dark, luxurious theme with gold and vibrant accents */
+        .bg-primary { background-color: #1a1c33; }
+        .bg-secondary { background-color: #2a2d4e; }
+        .bg-accent, .hover\:bg-accent-dark:hover { background-color: #ffc400; }
+        .text-accent { color: #ffc400; }
+        .border-accent { border-color: #ffc400; }
+
+        /* A common technique is to use gradients for buttons to make them pop */
+        .btn-gradient {
+            background-image: linear-gradient(to right, #ffc400 0%, #ff8a00 51%, #ffc400 100%);
+            background-size: 200% auto;
+            transition: all 0.3s ease-out;
+            color: #1a1c33;
+            font-weight: 700;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px 0 rgba(255, 196, 0, 0.3);
+        }
+        .btn-gradient:hover {
+            background-position: right center; /* change the direction of the change here */
+            box-shadow: 0 6px 20px 0 rgba(255, 196, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* This glowing effect is frequently used on important buttons or links to draw attention */
+        @keyframes glowing {
+            0% { box-shadow: 0 0 5px #ffc400, 0 0 10px #ffc400, 0 0 15px #ff8a00; }
+            50% { box-shadow: 0 0 10px #ffc400, 0 0 20px #ffc400, 0 0 30px #ff8a00; }
+            100% { box-shadow: 0 0 5px #ffc400, 0 0 10px #ffc400, 0 0 15px #ff8a00; }
+        }
+        .animate-glow {
+            animation: glowing 2s infinite ease-in-out;
+        }
+
+        /* Styling for game cards - often includes hover effects to feel more interactive */
+        .game-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #1a1c33;
+            border: 1px solid #3a3d6e;
+        }
+        .game-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 196, 0, 0.2);
+            z-index: 10;
+        }
+        .game-card .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(13, 14, 27, 1) 0%, rgba(13, 14, 27, 0) 100%);
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            padding: 1rem;
+        }
+        .game-card .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none; /* Hide button until hover */
+        }
+        .game-card:hover .play-button {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto; /* Enable button on hover */
+        }
+        .game-card:hover img {
+            filter: brightness(0.7);
+        }
+
+        /* Deposit Modal Styles */
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-box {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-hidden .modal-box {
+            transform: scale(0.95);
+        }
+        .modal-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-visible .modal-box {
+            transform: scale(1);
+        }
+        .glowing-border {
+            border: 2px solid #ffc400;
+            animation: glowing-border 2s infinite ease-in-out;
+        }
+
+        .extend{
+            margin-bottom: 250px;
+            padding-top: 20px;
+        }
+        @keyframes glowing-border {
+            0% { box-shadow: 0 0 8px #ffc400, inset 0 0 8px #ffc400; }
+            50% { box-shadow: 0 0 16px #ff8a00, inset 0 0 16px #ff8a00; }
+            100% { box-shadow: 0 0 8px #ffc400, inset 0 0 8px #ffc400; }
+        }
+        /* Flash text nhiều màu */
+    @keyframes flashColors {
+        0% { color: red; }
+        20% { color: blue; }
+        40% { color: green; }
+        60% { color: orange; }
+        80% { color: purple; }
+        100% { color: red; }
+    }
+    .animate-flash {
+        animation: flashColors 0.8s infinite;
+    }
+    
+
+    /* Flash border nhiều màu kiểu low-quality */
+    @keyframes borderFlash {
+        0% { border-color: red; }
+        20% { border-color: blue; }
+        40% { border-color: yellow; }
+        60% { border-color: green; }
+        80% { border-color: purple; }
+        100% { border-color: red; }
+    }
+    .animate-borderflash {
+        animation: borderFlash 1s infinite;
+    }
+
+    @keyframes rainbow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .rainbow-text {
+        background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+        background-size: 400% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: rainbow 3s linear infinite;
+    }
+    
+    </style>
+</head>
+    <!-- Banner upperupper -->
+<body class="min-h-screen">
+    <div id="ad-banner-top" class="fixed bottom-32 left-1/2 transform -translate-x-1/2 min-w-[550px] bg-white p-2 flex items-center justify-start border-2 border-red-500 z-50 animate-borderflash">
+        <img src="./asset/ad2.png" alt="Ad Image" class="w-20 h-20 object-cover">
+        <div class="ml-2 flex-1">
+            <div class="flex justify-between items-start">
+                <span class="text-s font-bold animate-flash">🪙 QUÀ CHO NGƯỜI MỚI!</span>
+                <button class="close-ad text-black text-[10px] px-1">X</button>
+            </div>
+            <p class="text-[15px] mt-1 rainbow-text">
+                Nhập mã mời BillyPhucLe88 nhận ngay 200k cho người mới !!!
+            </p>
+        </div>
+    </div>
+    
+    <!-- Banner down -->
+    <div id="ad-banner-bottom" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 min-w-[550px] bg-white p-2 flex items-center justify-start border-2 border-red-500 z-50 animate-borderflash">
+        <img src="./asset/ad.jpg" alt="Ad Image" class="w-20 h-20 object-cover">
+        <div class="ml-2 flex-1">
+            <div class="flex justify-between items-start">
+                <span class="text-s font-bold animate-flash">🎰 SỰ KIỆN TUẦN!</span>
+                <button class="close-ad text-black text-[10px] px-1">X</button>
+            </div>
+            <p class="text-[15px] mt-1 rainbow-text">
+                Tham gia HelloGit, nhận ngay mã mời 100k!
+            </p>
+        </div>
+    </div>
+    
+    <!-- 
+      HEADER SECTION
+      - Typically sticky or fixed at the top.
+      - Contains the logo, main navigation, and prominent Login/Register buttons.
+      - The contrast between the dark background and bright buttons is a key UX choice.
+    -->
+    <header class="bg-primary/80 backdrop-blur-sm shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-black text-accent tracking-wider">
+                Greenwich88<span class="text-white">.bet</span>
+            </div>
+            <nav class="hidden lg:flex items-center space-x-6">
+                <a href="./live.html" class="text-white font-semibold hover:text-accent transition-colors">Trang Chủ</a>
+                <a href="./live.html" class="text-white font-semibold hover:text-accent transition-colors">Thể Thao</a>
+                <a href="./live.html" class="text-white font-semibold hover:text-accent transition-colors">Live Casino</a>
+                <a href="./live.html" class="text-white font-semibold hover:text-accent transition-colors">Game Slots</a>
+                <a href="./live.html" class="text-white font-semibold hover:text-accent transition-colors">Xổ Số</a>
+                <a href="./redem.html" class="text-white font-semibold hover:text-accent transition-colors">Khuyến Mãi</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <div class="text-white font-semibold">Xin chào, <span class="text-accent">BillyPhucLe</span></div>
+                    <div class="text-sm text-gray-300">Số dư: <span class="font-bold">1,250,000đ</span></div>
+                </div>
+                <button id="deposit-btn" class="btn-gradient px-4 py-2 text-sm">Nạp Tiền</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- 
+          HERO BANNER / PROMOTIONS
+          - This is prime real estate. Usually a slider with large, high-quality graphics.
+          - The goal is to immediately show value to the user (e.g., big bonuses).
+          - A clear, unmissable Call-To-Action (CTA) is crucial. The 'animate-glow' class is applied here for emphasis.
+        -->
+        <section class="mb-12">
+            <div class="relative rounded-xl overflow-hidden shadow-2xl">
+                <img src="./asset/bg.jpg" alt="Promotion Banner" class="w-full h-[60vh] object-cover">
+                <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
+                    <h1 class="text-white text-3xl md:text-5xl font-black drop-shadow-lg mb-2">THƯỞNG CHÀO MỪNG 150%</h1>
+                    <p class="text-gray-200 md:text-lg mb-6 max-w-2xl">Nhận ngay ưu đãi khủng cho lần nạp đầu tiên. Đừng bỏ lỡ cơ hội vàng!</p>
+                    <button class="btn-gradient px-8 py-4 text-lg font-bold animate-glow">THAM GIA NGAY</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 
+          GAME CATEGORIES
+          - Icons and clear labels help users quickly find what they're looking for.
+          - This section acts as a secondary navigation level.
+        -->
+        <section class="mb-12">
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 text-center">
+                <a href="./live.html" class="block bg-secondary p-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-accent"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9.09 9.91 5.82 5.82"/><path d="M14.91 9.91 9.09 15.73"/></svg>
+                    <span class="font-semibold text-sm text-white">Live Casino</span>
+                </a>
+                <a href="#" class="block bg-secondary p-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-accent"><rect width="6" height="6" x="2" y="4" rx="2"/><rect width="6" height="6" x="16" y="4" rx="2"/><rect width="6" height="6" x="9" y="14" rx="2"/></svg>
+                    <span class="font-semibold text-sm text-white">Slots Game</span>
+                </a>
+                <a href="#" class="block bg-secondary p-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-accent"><path d="M12 5H2v14h10V5z"/><path d="M17 5h5v5h-5z"/><path d="m17 14 5 5-5-5z"/></svg>
+                    <span class="font-semibold text-sm text-white">Bài Việt Nam</span>
+                </a>
+                <a href="#" class="block bg-secondary p-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-accent"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span class="font-semibold text-sm text-white">Xổ Số</span>
+                </a>
+                <a href="#" class="block bg-secondary p-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-accent"><path d="m16 4 3 3-1.5 1.5-3-3L16 4"/><path d="m10 10-3 3 1.5 1.5 3-3L10 10"/><path d="M7 21 3 17l1.5-1.5 4 4L7 21"/><path d="m21 7-4 4-1.5-1.5 4-4L21 7"/><path d="M3.5 11.5 11 4l1.5 1.5-7.5 7.5L3.5 11.5Z"/></svg>
+                    <span class="font-semibold text-sm text-white">Bắn Cá</span>
+                </a>
+                 <a href="#" class="block bg-secondary p-4 rounded-lg hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-accent"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                    <span class="font-semibold text-sm text-white">Hỗ Trợ</span>
+                </a>
+                <!-- Add more categories if needed -->
+            </div>
+        </section>
+
+
+        <!-- 
+          FEATURED GAMES GRID
+          - This is the core of the page. It needs to be visually appealing and easy to scan.
+          - Each 'game-card' uses hover effects to provide feedback and feel dynamic.
+          - A hidden 'Play Now' button appears on hover, which is a common pattern to de-clutter the UI but provide a clear action.
+        -->
+        <section>
+            <h2 class="text-3xl font-bold text-white mb-2">Game <span class="text-accent">Nổi Bật</span></h2>
+            <p class="text-gray-400 mb-6">Những trò chơi được yêu thích nhất tuần qua.</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                <!-- Game Card Example 1 -->
+                <div class="game-card group">
+                    <a href="./taixiu.html">
+                        <img src="./asset/taixiu.png" alt="Game Tài Xỉu" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-110">
+                        <div class="overlay">
+                            <h3 class="text-white font-bold text-lg">Tài Xỉu Sicbo</h3>
+                        </div>
+                        <button class="play-button btn-gradient px-6 py-3">Chơi Ngay</button>
+
+                    </a>
+                </div>
+                <!-- Game Card Example 2 -->
+                <div class="game-card group">
+                    <a href="./roulette.html">
+
+                        <img src="./asset/roulette.jpg" alt="Game Roulette" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-110">
+                        <div class="overlay">
+                            <h3 class="text-white font-bold text-lg">Roulette</h3>
+                        </div>
+                         <button class="play-button btn-gradient px-6 py-3">Chơi Ngay</button>
+                    </a>
+                </div>
+                <!-- Game Card Example 3 -->
+                <div class="game-card group">
+                    <a href="./nohu.html">
+
+                            <img src="./asset/nohu.jpg" alt="Game Nổ Hũ" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-110">
+                            <div class="overlay">
+                                <h3 class="text-white font-bold text-lg">Nổ Hũ Thần Tài</h3>
+                            </div>
+                            <button class="play-button btn-gradient px-6 py-3">Chơi Ngay</button>
+                    </a>
+                </div>
+                <!-- Game Card Example 4 -->
+                    <div class="game-card group">
+                        <a href="./xocdia.html">
+
+                            <img src="./asset/xocdia.png" alt="Game Xóc Đĩa" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-110">
+                            <div class="overlay">
+                                <h3 class="text-white font-bold text-lg">Xóc Đĩa</h3>
+                            </div>
+                            <button class="play-button btn-gradient px-6 py-3">
+                                Chơi Ngay
+                            </button>
+                        </a>
+                    </div>
+                <!-- Game Card Example 5 -->
+                <div class="game-card group">
+                    <a href="./13cards.html">
+                        
+                        <img src="./asset/tienlen.png" alt="Game Tiến Lên" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-110">
+                        <div class="overlay">
+                            <h3 class="text-white font-bold text-lg">Tiến Lên Miền Nam</h3>
+                        </div>
+                        <button class="play-button btn-gradient px-6 py-3">Chơi Ngay</button>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 
+      FOOTER
+      - Provides essential but less-frequently-used links.
+      - Often includes information about licensing, responsible gaming, and contact info.
+      - Reinforces the brand and provides trust signals.
+    -->
+    <footer class="bg-primary mt-12 border-t border-gray-700">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+                <div>
+                    <h3 class="font-bold text-lg text-accent mb-2">VỀ CHÚNG TÔI</h3>
+                    <p class="text-gray-400 text-sm">
+                        Nền tảng giải trí trực tuyến hàng đầu, mang đến trải nghiệm đỉnh cao và an toàn cho người chơi.
+                    </p>
+                    <h3 class="font-bold text-lg text-accent mb-2 extend">ĐỊA CHỈ LIÊN HỆ</h3>
+                    <p class="text-gray-400 text-sm">
+                        JG6G+Q3 Preah Sihanouk, Cambodia
+                    </p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-accent mb-2">LIÊN KẾT NHANH</h3>
+                    <ul class="space-y-1">
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm">Điều khoản & Điều kiện</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm">Chính sách Bảo mật</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm">Hỗ trợ 24/7</a></li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 class="font-bold text-lg text-accent mb-2">CHỨNG NHẬN</h3>
+                    <p class="text-gray-400 text-sm">
+                       Được cấp phép và quản lý bởi các tổ chức uy tín quốc tế. Chơi có trách nhiệm.
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-4 text-center text-gray-500 text-xs extend">
+                &copy; 2024 YourBrand. All rights reserved. Vui lòng chơi có trách nhiệm.
+            </div>
+        </div>
+    </footer>
+    
+    <div id="deposit-modal-overlay" class="modal-overlay modal-hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="modal-box bg-primary p-8 rounded-xl glowing-border relative w-full max-w-3xl">
+            <button id="close-deposit-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="text-3xl font-bold text-accent mb-6 text-center">Tạo Lệnh Nạp Tiền</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <!-- Left: Bank Info -->
+                <div class="space-y-4">
+                    <p class="text-gray-300">Chuyển khoản đến thông tin bên dưới để nạp tiền vào tài khoản của bạn.</p>
+                    <div class="bg-secondary p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-400">Ngân hàng</span>
+                            <strong class="text-white">MBbank</strong>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Số tài khoản</span>
+                            <div class="flex items-center gap-2">
+                                <strong id="account-number" class="text-white text-lg">0912579488</strong>
+                                <button onclick="copyToClipboard('account-number')" class="copy-btn bg-gray-600 p-1 rounded-md hover:bg-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400">Chủ tài khoản</span>
+                            <strong class="text-white">DANG GIA HUNG</strong>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400">Nội dung</span>
+                            <div class="flex items-center gap-2">
+                                <strong id="deposit-content" class="text-accent text-lg">dghung22342</strong>
+                                 <button onclick="copyToClipboard('deposit-content')" class="copy-btn bg-gray-600 p-1 rounded-md hover:bg-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-yellow-500/80 text-center">Lưu ý: Vui lòng ghi đúng nội dung chuyển khoản để giao dịch được xử lý tự động.</p>
+                </div>
+                <!-- Right: QR Code -->
+                <div class="flex items-center justify-center">
+                    <img src="./asset/qr.png" alt="QR Code Ngân hàng" class="rounded-lg border-4 border-white">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const depositBtn = document.getElementById('deposit-btn');
+        const depositModalOverlay = document.getElementById('deposit-modal-overlay');
+        const closeDepositModalBtn = document.getElementById('close-deposit-modal-btn');
+
+        depositBtn.addEventListener('click', () => {
+            depositModalOverlay.classList.remove('modal-hidden');
+            depositModalOverlay.classList.add('modal-visible');
+        });
+
+        function closeModal() {
+            depositModalOverlay.classList.remove('modal-visible');
+            depositModalOverlay.classList.add('modal-hidden');
+        }
+
+        closeDepositModalBtn.addEventListener('click', closeModal);
+
+        depositModalOverlay.addEventListener('click', (e) => {
+            if (e.target === depositModalOverlay) {
+                closeModal();
+            }
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            // A temporary textarea is created to execute the copy command
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert(`Đã sao chép: ${textToCopy}`);
+        }
+    </script>
+
+    <script>
+const banners = [
+    {el: document.getElementById('ad-banner-top'), delay: 2500},
+    {el: document.getElementById('ad-banner-bottom'), delay: 2800}
+];
+
+let displayedBanners = []; // lưu banner đang hiển thị
+
+banners.forEach(b => {
+    const btn = b.el.querySelector('.close-ad');
+    
+    const showBanner = () => {
+        // Nếu banner chưa trong mảng hiển thị, thêm vào
+        if(!displayedBanners.includes(b.el)){
+            displayedBanners.push(b.el);
+        }
+
+        // Cập nhật vị trí bottom cho từng banner theo thứ tự xuất hiện
+        displayedBanners.forEach((bannerEl, index) => {
+            bannerEl.style.bottom = `${5 + index * 120}px`; // khoảng cách 28px cho từng banner
+            bannerEl.style.display = 'flex';
+        });
+    };
+
+    // Click đóng banner
+    btn.addEventListener('click', () => {
+        // Xóa khỏi mảng hiển thị
+        displayedBanners = displayedBanners.filter(el => el !== b.el);
+        b.el.style.display = 'none';
+        // Sau delay, banner xuất hiện lại
+        setTimeout(showBanner, b.delay);
+    });
+
+    // Hiển thị lần đầu
+    showBanner();
+});
+
+
+    </script>
+</body>
+</html>
